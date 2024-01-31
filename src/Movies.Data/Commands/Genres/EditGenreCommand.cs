@@ -10,7 +10,7 @@ public class EditGenreCommand(int id, Genre entity) : ICommand<IResponse<Genre>>
     private const string Sql = @"
     UPDATE Genres SET GenreName = @genreName
     OUTPUT INSERTED.*
-    WHERE GenreID = @id";
+    WHERE GenreID = @id AND Version = @version";
 
     private readonly int _id = id;
     private readonly Genre _entity = entity;
@@ -35,6 +35,7 @@ public class EditGenreCommand(int id, Genre entity) : ICommand<IResponse<Genre>>
             var inserted = await connection.QuerySingleAsync<Genre>(Sql, new
             {
                 id = _id,
+                version = _entity.Version,
                 genreName = _entity.GenreName
             }, transaction); ;
 
