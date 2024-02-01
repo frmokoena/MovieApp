@@ -15,7 +15,7 @@ namespace Movies.Web.Controllers
         private readonly IUnitOfWorkProvider _provider = provider;
 
         private static readonly string _genreCollectionCacheKey = "genreCollection";
-        private static DistributedCacheEntryOptions _cacheOptions = new DistributedCacheEntryOptions
+        private static DistributedCacheEntryOptions _cacheOptions = new()
         {
             AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(180)
         };
