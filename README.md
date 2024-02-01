@@ -6,7 +6,7 @@ The MovieApp in ASP.NET Core Web App (MVC).
 
 ## Table Of Contents
 
-- [Tax Matters](#Movie-App)
+- [Movie App](#Movie-App)
   - [Introduction](#introduction)
   - [Table Of Contents](#table-of-contents)
 
@@ -16,7 +16,7 @@ The MovieApp in ASP.NET Core Web App (MVC).
   - [Running the application](#running-the-application)
 - [Architecture and Design Decisions](#architecture-and-design-decisions) 
   - [The Data Project](#the-data-project-moviesdata)
-  - [The Web Application](#he-web-application-moviesweb) 
+  - [The Web Application](#the-web-application-moviesweb) 
   - [The Test Projects](#the-test-projects)
   - [Concurrency Conflicts](#concurrency-conflicts)
 - [Patterns Used](#patterns-used)
@@ -41,7 +41,7 @@ To build and run the project, open a command prompt to the root of the solution,
 
     ```
     cd ./src/Movies.Web
-    dotnet publish -o ../../assets/api
+    dotnet publish -o ../../assets/web
     cd ../..
     ```
 3. Run the `scripts.sql` to create the database and related tables. *NB:* The solution uses the Express edition of the SQL Server. The connection string can be found inside `appsettings.json` and be modified to any valid connection string.
@@ -73,7 +73,7 @@ This is the entry point for the web front-end application. This is the ASP.NET C
 
 ## The Test Projects
 
-These houes our project tests.
+These house our project tests.
 
 ## Concurrency Conflicts
 
@@ -92,8 +92,8 @@ In the code below, the `[Timestamp]` attribute maps a property to a SQL Server `
 
 # Patterns Used
 
-The solution architecture adopts the CQRS (Command and Query Responsibility Segregation) pattern, along with the Unit of Work pattern.
+The solution architecture uses the CQRS pattern (Command and Query Responsibility Segregation) together with the Unit of Work pattern.
 
-_**CQRS pattern**_: Separates write commands from read queries. 
+**CQRS pattern**_: Separates write commands from read queries.
 
-_**Unit of Work pattern**_:  manage transactions and ensure that multiple operations are treated as a single logical unit. i.e. they should all pass or fail. This guarantees data integrity and consistency in applications
+**Unit of Work pattern**_: Manages transactions and ensures that multiple operations are treated as a single logical unit, i.e. they should all succeed or fail. This guarantees data integrity and consistency in applications.
