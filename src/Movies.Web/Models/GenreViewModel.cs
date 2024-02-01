@@ -7,6 +7,6 @@ namespace Movies.Web.Models
         [Display(Name = "Genre")]
         [Required(ErrorMessage = "Required")]
         [MaxLength(50, ErrorMessage = "Genre name cannot be longer than {1} characters.")]
-        public string Name { get; set; } = default!;
+        public string GenreName { get; set; } = default!;
     }
 }

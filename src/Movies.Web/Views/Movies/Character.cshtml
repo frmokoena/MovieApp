@@ -1,0 +1,42 @@
+﻿@model Movies.Web.Models.CharacterViewModel
+
+@{
+    ViewData["Title"] = "Character";
+}
+
+<h1>Character</h1>
+
+<h4>Add Character</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Character">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="MovieID" />
+            <div class="form-group mb-3">
+                <label asp-for="CharacterName" class="control-label"></label>
+                <input asp-for="CharacterName" class="form-control" />
+                <span asp-validation-for="CharacterName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="ActorID" class="control-label"></label>
+                <select asp-for="ActorID" class="form-control" asp-items="Model.Actors">
+                    <option value="">-- Pick Actor --</option>
+                </select>
+                <span asp-validation-for="ActorID" class="text-danger" />
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Add" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    @Html.ActionLink("Details", "Details", new { id = Model.MovieID }) | <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

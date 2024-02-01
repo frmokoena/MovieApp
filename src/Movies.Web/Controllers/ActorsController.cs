@@ -1,81 +1,192 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Movies.Data;
+using Movies.Data.Commands.Actors;
+using Movies.Data.Entities;
+using Movies.Data.Queries.Actors;
+using Movies.Web.Models;
 
 namespace Movies.Web.Controllers
 {
-    public class ActorsController : Controller
+    public class ActorsController(IUnitOfWorkProvider provider) : Controller
     {
-        // GET: ActorsController
-        public ActionResult Index()
+        private readonly IUnitOfWorkProvider _provider = provider;
+
+        public async Task<ActionResult> Index()
         {
-            return View();
+            using var uow = _provider.Create();
+            var response = await uow.QueryAsync(new ListActorsQuery());
+            var result = response.Content ?? [];
+            return View(result);
         }
 
-        // GET: ActorsController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: ActorsController/Create
         public ActionResult Create()
         {
             return View();
         }
 
-        // POST: ActorsController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<ActionResult> Create([Bind("ActorName,ActorDOB")] ActorViewModel actor)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    using var uow = _provider.Create();
+                    var result = await uow.ExecuteAsync(new AddActorCommand(new Actor { ActorDOB = actor.ActorDOB, ActorName = actor.ActorName }));
+
+                    if (!result.IsError)
+                    {
+                        return RedirectToAction(nameof(Index));
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(result.Error))
+                    {
+                        // We can intercept the error to present user friendly message and possibly redact sensitive information
+                        ModelState.AddModelError("", result.Error);
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "Unexpected response received while executing the request");
+                    }
+                }
             }
-            catch
+            catch (Exception /* ex */)
             {
-                return View();
+                //Log the error (uncomment ex variable name and write a log.
+                ModelState.AddModelError("", "Unable to save changes. " +
+                    "Try again, and if the problem persists " +
+                    "see your system administrator.");
             }
+
+            return View(actor);
         }
 
-        // GET: ActorsController/Edit/5
-        public ActionResult Edit(int id)
+
+        public async Task<ActionResult> Edit(int? id)
         {
-            return View();
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            using var uow = _provider.Create();
+            var getEntity = await uow.QueryAsync(new GetActorByIdQuery(id.Value));
+
+            if (getEntity.IsError)
+            {
+                return NotFound();
+            }
+
+            return View(new ActorEditViewModel
+            {
+                ActorID = getEntity.Content!.ActorID,
+                ActorDOB = getEntity.Content.ActorDOB,
+                ActorName = getEntity.Content.ActorName,
+                Version = getEntity.Content!.Version,
+            });
         }
 
-        // POST: ActorsController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public async Task<ActionResult> Edit(int id, [Bind("ActorID,ActorName,ActorDOB,Version")] ActorEditViewModel model)
+        {
+            if (id != model.ActorID)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    using var uow = _provider.Create();
+                    var result = await uow.ExecuteAsync(new EditActorCommand(id, new Actor
+                    {
+                        ActorID = model.ActorID,
+                        ActorDOB = model.ActorDOB,
+                        ActorName = model.ActorName,
+                        Version = model.Version
+                    }));
+
+                    if (!result.IsError)
+                    {
+                        return RedirectToAction(nameof(Index));
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(result.Error))
+                    {
+                        // We can intercept the error to present user friendly message and possibly redact sensitive information
+                        ModelState.AddModelError("", result.Error);
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "Unexpected response received while executing the request");
+                    }
+                }
+            }
+            catch (Exception /* ex */)
+            {
+                //Log the error (uncomment ex variable name and write a log.
+                ModelState.AddModelError("", "Unable to save changes. " +
+                    "Try again, and if the problem persists " +
+                    "see your system administrator.");
+            }
+
+            return View(model);
+        }
+
+
+        public async Task<ActionResult> Delete(int? id, bool? saveChangesError = false)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            using var uow = _provider.Create();
+            var getEntity = await uow.QueryAsync(new GetActorByIdQuery(id.Value));
+
+            if (getEntity.IsError)
+            {
+                return NotFound();
+            }
+
+            if (saveChangesError.GetValueOrDefault())
+            {
+                ViewData["ErrorMessage"] =
+                    "Delete failed. Ensure entity is not being used and try again, and if the problem persists " +
+                    "see your system administrator.";
+            }
+
+            return View(getEntity.Content);
+        }
+
+        [ValidateAntiForgeryToken]
+        [HttpPost, ActionName("Delete")]
+        public async Task<ActionResult> DeleteConfirmed(int id)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+                using var uow = _provider.Create();
+                var result = await uow.ExecuteAsync(new DeleteActorCommand(id));
 
-        // GET: ActorsController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
+                if (!result.IsError)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
 
-        // POST: ActorsController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
+                if (result.Error?.Contains("not found", StringComparison.OrdinalIgnoreCase) ?? false)
+                {
+                    return NotFound();
+                }
+
+                return RedirectToAction(nameof(Delete), new { id, saveChangesError = true });
             }
-            catch
+            catch (Exception /* ex */)
             {
-                return View();
+                //Log the error (uncomment ex variable name and write a log.)
+                return RedirectToAction(nameof(Delete), new { id, saveChangesError = true });
             }
         }
     }

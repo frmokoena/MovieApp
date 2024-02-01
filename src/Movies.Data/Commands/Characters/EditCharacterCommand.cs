@@ -3,43 +3,35 @@ using Movies.Data.Entities;
 using System.Data;
 using System.Net;
 
-namespace Movies.Data.Commands.Genres;
+namespace Movies.Data.Commands.Characters;
 
-public class EditGenreCommand(int id, Genre entity) : ICommand<IResponse<Genre>>
+public class EditCharacterCommand(Character entity) : ICommand<IResponse<Character>>
 {
     private const string Sql = @"
-    UPDATE Genres SET GenreName = @genreName
+    UPDATE Characters SET CharacterName = @characterName
     OUTPUT INSERTED.*
-    WHERE GenreID = @id AND Version = @version";
+    WHERE MovieID = @movieID AND ActorID = @actorID AND Version = @version";
 
-    private readonly int _id = id;
-    private readonly Genre _entity = entity;
+    private readonly Character _entity = entity;
 
     public bool RequiresTransaction => false;
 
-    public async Task<IResponse<Genre>> ExecuteAsync(
+    public async Task<IResponse<Character>> ExecuteAsync(
         IDbConnection connection,
         IDbTransaction? transaction,
         CancellationToken cancellationToken = default)
     {
-        if(_id != _entity?.GenreID)
-        {
-            return new Response<Genre>(
-                raw: null,
-                HttpStatusCode.NotFound,
-                reason: "Entity not found");
-        }
-
         try
         {
-            var updated = await connection.QuerySingleAsync<Genre>(Sql, new
+            var updated = await connection.QuerySingleAsync<Character>(Sql, new
             {
-                id = _id,
+                movieID = _entity.MovieID,
+                actorID = _entity.ActorID,
                 version = _entity.Version,
-                genreName = _entity.GenreName
+                characterName = _entity.CharacterName
             }, transaction); ;
 
-            return new Response<Genre>(
+            return new Response<Character>(
                 updated,
                 raw: string.Empty,
                 HttpStatusCode.OK);
@@ -48,13 +40,13 @@ public class EditGenreCommand(int id, Genre entity) : ICommand<IResponse<Genre>>
         {
             if (ex.Message?.Contains("duplicate", StringComparison.InvariantCultureIgnoreCase) ?? false)
             {
-                return new Response<Genre>(
+                return new Response<Character>(
                     raw: null,
                     HttpStatusCode.Conflict,
                     reason: "Entity with the same genre name exists");
             }
 
-            return new Response<Genre>(
+            return new Response<Character>(
                 raw: null,
                 HttpStatusCode.InternalServerError,
                 reason: "Failed to save entity");

@@ -1,0 +1,47 @@
+﻿@model Movies.Web.Models.CharacterEditViewModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Character Edit</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ActorID" />
+            <input type="hidden" asp-for="MovieID" />
+            <input type="hidden" asp-for="Version" />
+            <div class="form-group">
+                <label asp-for="CharacterName" class="control-label"></label>
+                <input asp-for="CharacterName" class="form-control" />
+                <span asp-validation-for="CharacterName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Actor" class="control-label"></label>
+                <input asp-for="Actor" class="form-control" readonly="readonly" />
+                <span asp-validation-for="Actor" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Movie" class="control-label"></label>
+                <input asp-for="Movie" class="form-control" readonly="readonly" />
+                <span asp-validation-for="Movie" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

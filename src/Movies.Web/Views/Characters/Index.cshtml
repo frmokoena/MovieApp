@@ -1,5 +1,44 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<Movies.Data.Entities.Character>
+
 @{
+    ViewData["Title"] = "Index";
 }
+
+<h1>Index</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.CharacterName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ActorID)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MovieID)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CharacterName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Actor.ActorName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Movie.MovieName)
+                </td>
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { actorId = item.Actor.ActorID, movieId = item.Movie.MovieID  }) |
+                    @Html.ActionLink("Delete", "Delete", new { actorID = item.Actor.ActorID, movieId = item.Movie.MovieID })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

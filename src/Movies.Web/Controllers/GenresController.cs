@@ -13,14 +13,10 @@ namespace Movies.Web.Controllers
 
         public async Task<ActionResult> Index()
         {
-            IEnumerable<Genre> genres;
-            using (var uow = _provider.Create())
-            {
-                var response = await uow.QueryAsync(new ListGenresQuery());
-                genres = response.Content ?? [];
-            }
-
-            return View(genres);
+            using var uow = _provider.Create();
+            var response = await uow.QueryAsync(new ListGenresQuery());
+            var result = response.Content ?? [];
+            return View(result);
         }
 
         public ActionResult Create()
@@ -30,14 +26,14 @@ namespace Movies.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create([Bind("Name")] GenreViewModel genre)
+        public async Task<ActionResult> Create([Bind("GenreName")] GenreViewModel model)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
                     using var uow = _provider.Create();
-                    var result = await uow.ExecuteAsync(new AddGenreCommand(new Genre { GenreName = genre.Name }));
+                    var result = await uow.ExecuteAsync(new AddGenreCommand(new Genre { GenreName = model.GenreName }));
 
                     if (!result.IsError)
                     {
@@ -63,7 +59,7 @@ namespace Movies.Web.Controllers
                     "see your system administrator.");
             }
 
-            return View(genre);
+            return View(model);
         }
 
         public async Task<ActionResult> Edit(int? id)
@@ -74,21 +70,21 @@ namespace Movies.Web.Controllers
             }
 
             using var uow = _provider.Create();
-            var getGenre = await uow.QueryAsync(new GetGenreByIdQuery(id.Value));
+            var getEntity = await uow.QueryAsync(new GetGenreByIdQuery(id.Value));
 
-            if (getGenre.IsError)
+            if (getEntity.IsError)
             {
                 return NotFound();
             }
 
-            return View(getGenre.Content);
+            return View(getEntity.Content);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit(int id, [Bind("GenreID,GenreName,Version")] Genre genre)
+        public async Task<ActionResult> Edit(int id, [Bind("GenreID,GenreName,Version")] Genre model)
         {
-            if (id != genre.GenreID)
+            if (id != model.GenreID)
             {
                 return NotFound();
             }
@@ -98,7 +94,7 @@ namespace Movies.Web.Controllers
                 if (ModelState.IsValid)
                 {
                     using var uow = _provider.Create();
-                    var result = await uow.ExecuteAsync(new EditGenreCommand(id,genre));
+                    var result = await uow.ExecuteAsync(new EditGenreCommand(id, model));
 
                     if (!result.IsError)
                     {
@@ -124,7 +120,7 @@ namespace Movies.Web.Controllers
                     "see your system administrator.");
             }
 
-            return View(genre);
+            return View(model);
         }
 
         public async Task<ActionResult> Delete(int? id, bool? saveChangesError = false)
@@ -135,9 +131,9 @@ namespace Movies.Web.Controllers
             }
 
             using var uow = _provider.Create();
-            var getGenre = await uow.QueryAsync(new GetGenreByIdQuery(id.Value));
+            var getEntity = await uow.QueryAsync(new GetGenreByIdQuery(id.Value));
 
-            if (getGenre.IsError)
+            if (getEntity.IsError)
             {
                 return NotFound();
             }
@@ -149,7 +145,7 @@ namespace Movies.Web.Controllers
                     "see your system administrator.";
             }
 
-            return View(getGenre.Content);
+            return View(getEntity.Content);
         }
 
         [ValidateAntiForgeryToken]
