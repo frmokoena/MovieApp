@@ -3,6 +3,7 @@ using Movies.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddUnitOfWork(
     builder.Configuration, connectionStringName: "MoviesContext");
 

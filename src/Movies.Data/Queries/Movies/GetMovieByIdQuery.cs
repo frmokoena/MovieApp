@@ -60,7 +60,7 @@ public class GetMovieByIdQuery(int id) : IQuery<IResponse<Movie?>>
 
                 m.Characters ??= new List<Character>();
 
-                if (character?.MovieID != null)
+                if (character?.MovieID > 0)
                 {
                     character.ActorID = actor.ActorID;
                     character.Actor = actor;
