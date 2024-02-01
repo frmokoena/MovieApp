@@ -28,7 +28,7 @@ The MovieApp in ASP.NET Core Web App (MVC).
 
 ## Building the solution
 
-The solution contains the release assets in the file `assets.zip`. The assets can be unzipped and this section can be skipped.
+The solution contains the release assets in the file `assets.zip` (and full solution source code in `source.zip`). The assets can be unzipped and this section can be skipped.
 
 To build and run the project, open a command prompt to the root of the solution, and perform the following: 
 
